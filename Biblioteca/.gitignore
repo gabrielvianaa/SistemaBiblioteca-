@@ -1,0 +1,130 @@
+# ============================================================
+#  .gitignore — Sistema de Biblioteca
+#  Java 17 + Maven + IntelliJ IDEA + SQLite + Playwright
+# ============================================================
+
+
+# ─── BANCO DE DADOS ─────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+
+# ─── MAVEN ──────────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# Cache local do repositório Maven (gerado pelo GitLab CI)
+.m2/
+
+# Arquivo de checksum do Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+
+# ─── INTELLIJ IDEA ──────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Shelf de mudanças e tasks locais
+.idea/shelf/
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/workspace.xml
+
+# Configurações de run/debug locais
+.idea/runConfigurations/
+
+
+# ─── ECLIPSE ────────────────────────────────────────────────
+.classpath
+.project
+.settings/
+bin/
+
+
+# ─── VS CODE ────────────────────────────────────────────────
+.vscode/
+*.code-workspace
+
+
+# ─── NODE / PLAYWRIGHT / NEWMAN ─────────────────────────────
+node_modules/
+package-lock.json
+yarn.lock
+
+# Relatórios gerados pelo Playwright
+playwright-report/
+test-results/
+.playwright/
+
+# Relatórios gerados pelo Newman
+newman/
+
+
+# ─── SISTEMA OPERACIONAL ────────────────────────────────────
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+
+# Linux
+*~
+.nfs*
+
+
+# ─── LOGS E TEMPORÁRIOS ─────────────────────────────────────
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+logs/
+log/
+
+
+# ─── VARIÁVEIS DE AMBIENTE E SEGREDOS ───────────────────────
+.env
+.env.local
+.env.*.local
+secrets.properties
+application-local.properties
+
+
+# ─── COBERTURA DE CÓDIGO ────────────────────────────────────
+.jacoco/
+jacoco.exec
+coverage/
+*.lcov
+
+
+# ─── OUTROS ─────────────────────────────────────────────────
+# Fat JAR gerado pelo maven-shade-plugin (já está em target/)
+biblioteca-app.jar
+
+# Arquivos de configuração pessoal do Maven
+settings.xml

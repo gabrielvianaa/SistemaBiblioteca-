@@ -1,0 +1,349 @@
+{
+  "info": {
+    "_postman_id": "biblioteca-api-tests-2025",
+    "name": "Biblioteca API – Testes",
+    "description": "Collection de testes de API para o Sistema de Biblioteca.\nExecutar via Newman: newman run Biblioteca_API_Tests.postman_collection.json",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080", "type": "string" },
+    { "key": "isbn_teste", "value": "978-85-333-0099-9", "type": "string" },
+    { "key": "emprestimo_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "📚 Livros",
+      "item": [
+        {
+          "name": "CT-A01 – POST /api/livros (sucesso)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Resposta contém isbn', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.isbn).to.eql('978-85-333-0099-9');",
+                  "});",
+                  "pm.test('Livro está disponível', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.disponivel).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isbn\": \"978-85-333-0099-9\",\n  \"titulo\": \"Livro de Teste\",\n  \"autor\": \"Autor Teste\",\n  \"anoPub\": 2020\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/livros", "host": ["{{base_url}}"], "path": ["api", "livros"] }
+          }
+        },
+        {
+          "name": "CT-A02 – POST /api/livros (ISBN duplicado → 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 409', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test('Mensagem de erro correta', function () {",
+                  "    var body = pm.response.text();",
+                  "    pm.expect(body).to.include('ISBN ja existe');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isbn\": \"978-85-333-0099-9\",\n  \"titulo\": \"Duplicado\",\n  \"autor\": \"Autor\",\n  \"anoPub\": 2020\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/livros", "host": ["{{base_url}}"], "path": ["api", "livros"] }
+          }
+        },
+        {
+          "name": "CT-A03 – POST /api/livros (dados inválidos → 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isbn\": \"\",\n  \"titulo\": \"\",\n  \"autor\": \"Autor\",\n  \"anoPub\": 99\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/livros", "host": ["{{base_url}}"], "path": ["api", "livros"] }
+          }
+        },
+        {
+          "name": "CT-A04 – GET /api/livros (listar todos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Resposta é um array', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});",
+                  "pm.test('Array não está vazio', function () {",
+                  "    pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/livros", "host": ["{{base_url}}"], "path": ["api", "livros"] }
+          }
+        },
+        {
+          "name": "CT-A05 – GET /api/livros/{isbn} (encontrado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Título correto', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.titulo).to.eql('Livro de Teste');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/livros/978-85-333-0099-9", "host": ["{{base_url}}"], "path": ["api", "livros", "978-85-333-0099-9"] }
+          }
+        },
+        {
+          "name": "CT-A06 – GET /api/livros/{isbn} (não encontrado → 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/api/livros/000-invalido", "host": ["{{base_url}}"], "path": ["api", "livros", "000-invalido"] }
+          }
+        },
+        {
+          "name": "CT-A10 – DELETE /api/livros/{isbn}",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Recriar livro para deletar separadamente se necessário"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/api/livros/978-85-333-0099-9", "host": ["{{base_url}}"], "path": ["api", "livros", "978-85-333-0099-9"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Empréstimos",
+      "item": [
+        {
+          "name": "CT-A07 – POST /api/emprestimos (sucesso)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Garante que o livro existe antes de emprestar",
+                  "pm.sendRequest({",
+                  "  url: pm.variables.get('base_url') + '/api/livros',",
+                  "  method: 'POST',",
+                  "  header: {'Content-Type': 'application/json'},",
+                  "  body: { mode: 'raw', raw: JSON.stringify({isbn:'978-85-333-0001-1',titulo:'Dom Casmurro',autor:'Machado de Assis',anoPub:1899}) }",
+                  "}, function(err, res) {});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test('Resposta contém ID de empréstimo', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.id).to.match(/^EMP-\\d{4}$/);",
+                  "    pm.collectionVariables.set('emprestimo_id', json.id);",
+                  "});",
+                  "pm.test('Livro marcado como indisponível', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.livro.disponivel).to.be.false;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isbn\": \"978-85-333-0001-1\",\n  \"usuario\": \"Ana\",\n  \"data\": \"2025-06-01\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/emprestimos", "host": ["{{base_url}}"], "path": ["api", "emprestimos"] }
+          }
+        },
+        {
+          "name": "CT-A08 – POST /api/emprestimos (livro indisponível → 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 409', function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test('Mensagem correta', function () {",
+                  "    pm.expect(pm.response.text()).to.include('Livro indisponivel');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isbn\": \"978-85-333-0001-1\",\n  \"usuario\": \"Bruno\",\n  \"data\": \"2025-06-01\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/api/emprestimos", "host": ["{{base_url}}"], "path": ["api", "emprestimos"] }
+          }
+        },
+        {
+          "name": "CT-A09 – PATCH /api/emprestimos/{id}/devolver (sucesso)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Empréstimo marcado como devolvido', function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.devolvido).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataDevolucao\": \"2025-06-10\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/emprestimos/{{emprestimo_id}}/devolver",
+              "host": ["{{base_url}}"],
+              "path": ["api", "emprestimos", "{{emprestimo_id}}", "devolver"]
+            }
+          }
+        },
+        {
+          "name": "CT-A11 – GET /api/emprestimos/atraso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status deve ser 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Resposta é um array', function () {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/emprestimos/atraso?hoje=2025-06-30",
+              "host": ["{{base_url}}"],
+              "path": ["api", "emprestimos", "atraso"],
+              "query": [{ "key": "hoje", "value": "2025-06-30" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+image: maven:3.9.6-eclipse-temurin-17
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - mvn clean compile
+
+test:
+  stage: test
+  script:
+    - mvn test
+  artifacts:
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+    when: always
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Simulando deploy em producao..."
+    - mvn package -DskipTests
+    - echo "Deploy concluido com sucesso!"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - when: never
