@@ -2,7 +2,7 @@
 
 > Trabalho Final — Disciplina de Teste de Software | Engenharia de Software
 
-Sistema de gerenciamento de acervo de livros e empréstimos com **interface de linha de comando (CLI)**, **API REST** e **banco de dados SQLite** persistente. Cobre os três níveis da pirâmide de testes: unitários (JUnit 5), API (Postman/Newman) e E2E (Playwright).
+Sistema de gerenciamento de acervo de livros e empréstimos com **interface de linha de comando (CLI)**, **API REST** e **banco de dados SQLite** persistente. Cobre os três níveis da pirâmide de testes: unitários e de integração (JUnit 5), API (Postman/Newman) e E2E (Playwright).
 
 ---
 
@@ -29,14 +29,14 @@ Sistema de gerenciamento de acervo de livros e empréstimos com **interface de l
 O **Sistema de Biblioteca** permite o gerenciamento completo de um acervo de livros e o controle de empréstimos e devoluções. Possui:
 
 - Autenticação com três perfis de acesso: **ADMIN**, **BIBLIOTECARIO** e **LEITOR**
-- CRUD completo de livros e usuários
+- CRUD completo de livros e usuários com controle de acesso por perfil
 - Registro de empréstimos com prazo automático de 14 dias e ID sequencial (`EMP-XXXX`)
-- Registro de devoluções com data
+- Registro de devoluções com data e liberação automática do livro
 - Alertas de atraso com cálculo de dias
-- Histórico de empréstimos por usuário
-- Dashboard com resumo geral
+- Histórico de empréstimos por usuário (LEITOR vê apenas o próprio)
+- Dashboard com resumo geral e alertas
 - **API REST** com 13 endpoints (Javalin, porta 8080)
-- **CLI interativa** com menus hierárquicos e controle de perfil
+- **CLI interativa** com menus hierárquicos e controle de perfil em todos os submenus
 
 Todos os dados são persistidos em um arquivo **SQLite** local (`biblioteca.db`) criado automaticamente na primeira execução.
 
@@ -48,13 +48,17 @@ Todos os dados são persistidos em um arquivo **SQLite** local (`biblioteca.db`)
 |--------|-----------|--------|
 | Linguagem | Java | 17 |
 | Banco de dados | SQLite (JDBC) | 3.45.3.0 |
-| Servidor HTTP (API) | Javalin | 6.1.3 |
+| Servidor HTTP (API REST) | Javalin | 6.1.3 |
 | Serialização JSON | Jackson | 2.17.0 |
+| Log | SLF4J Simple | 2.0.12 |
 | Build | Maven | 3.9.6 |
-| Testes unitários | JUnit 5 | 5.10.1 |
+| Testes unitários / integração | JUnit 5 | 5.10.1 |
 | Testes de API | Postman / Newman | v11 |
 | Testes E2E | Playwright | 1.44.x |
 | CI/CD | GitLab CI | — |
+| IDE recomendada | IntelliJ IDEA | 2024+ |
+
+> **Node.js 20+** é necessário para rodar o Playwright e o Newman. Baixe em https://nodejs.org (versão LTS).
 
 ---
 
@@ -64,29 +68,29 @@ Todos os dados são persistidos em um arquivo **SQLite** local (`biblioteca.db`)
 Biblioteca/
 ├── src/
 │   ├── main/java/com/example/biblioteca/
-│   │   ├── Main.java                          # Ponto de entrada (CLI + API)
+│   │   ├── Main.java                          # Ponto de entrada — CLI + API
 │   │   ├── api/
 │   │   │   └── ApiServer.java                 # Servidor REST Javalin (porta 8080)
 │   │   ├── cli/
 │   │   │   ├── Console.java                   # Utilitários de I/O do terminal
 │   │   │   ├── TelaLogin.java                 # Autenticação (até 3 tentativas)
-│   │   │   ├── MenuPrincipal.java             # Menu raiz com controle de perfil
+│   │   │   ├── MenuPrincipal.java             # Menu raiz — passa Usuario aos submenus
 │   │   │   ├── MenuLivros.java                # CRUD de livros com controle de perfil
 │   │   │   ├── MenuEmprestimos.java           # Empréstimos com controle de perfil
 │   │   │   └── MenuUsuarios.java              # CRUD de usuários (apenas ADMIN)
 │   │   ├── db/
-│   │   │   └── DatabaseConnection.java        # Conexão SQLite + criação do schema
+│   │   │   └── DatabaseConnection.java        # Conexão SQLite + schema automático
 │   │   ├── model/
 │   │   │   ├── Livro.java
 │   │   │   ├── Emprestimo.java
 │   │   │   └── Usuario.java
 │   │   ├── repository/
-│   │   │   ├── LivroRepository.java           # CRUD em memória (usado pelos testes unitários)
+│   │   │   ├── LivroRepository.java           # CRUD em memória (testes unitários)
 │   │   │   ├── LivroRepositoryDB.java         # CRUD de livros no SQLite
 │   │   │   ├── EmprestimoRepository.java      # CRUD de empréstimos no SQLite
 │   │   │   └── UsuarioRepository.java         # CRUD de usuários no SQLite
 │   │   └── service/
-│   │       ├── BibliotecaService.java         # Serviço em memória (usado pelos testes unitários)
+│   │       ├── BibliotecaService.java         # Serviço em memória (testes unitários)
 │   │       └── BibliotecaServiceDB.java       # Serviço principal com banco SQLite
 │   └── test/java/com/example/biblioteca/
 │       ├── LivroTest.java                     #  3 testes unitários
@@ -98,18 +102,19 @@ Biblioteca/
 │       ├── EmprestimoRepositoryTest.java      # 10 testes de integração (SQLite)
 │       ├── UsuarioRepositoryTest.java         # 11 testes de integração (SQLite)
 │       └── BibliotecaServiceDBTest.java       # 15 testes de integração (SQLite)
-|   └── testes_api/
-│       └── Biblioteca_API_Tests.postman_collection.json
-|   └── testes_e2e/
-│       ├── biblioteca.e2e.test.js
-│       └── playwright.config.js
+├── testes_api/
+│   └── Biblioteca_API_Tests.postman_collection.json
+├── testes_e2e/
+│   ├── package.json
+│   ├── playwright.config.js
+│   └── tests/
+│       └── biblioteca.e2e.test.js
 ├── docs/
-│   ├── 01_Documento_de_Visao_e_Historias_de_Usuario.docx
-│   ├── 02_Plano_de_Testes.docx
-│   ├── 03_Casos_de_Teste.docx
-│   └── 04_Relatorio_Final.docx
+│   ├── documentoVisaoHistoria.docx
+│   ├── planoDeTeste.docx
+│   ├── cadoDeTeste.docx
+│   └── relatorioFinal.docx
 ├── pom.xml
-├── .gitlab-ci.yml
 ├── .gitignore
 └── README.md
 ```
@@ -118,7 +123,7 @@ Biblioteca/
 
 ## Banco de Dados
 
-O arquivo `biblioteca.db` é criado automaticamente na raiz do projeto na primeira execução.
+O arquivo `biblioteca.db` é criado automaticamente na raiz do projeto na primeira execução. O `.gitignore` já está configurado para não versionar este arquivo.
 
 ```sql
 CREATE TABLE livros (
@@ -148,11 +153,14 @@ CREATE TABLE emprestimos (
 );
 ```
 
-**Configurações aplicadas automaticamente:**
-- `autoCommit = true` — evita `SQLITE_BUSY`
-- `PRAGMA journal_mode=WAL` — melhor concorrência
-- `PRAGMA busy_timeout=3000` — aguarda até 3s antes de falhar
-- `PRAGMA foreign_keys=ON` — impede remover livro com empréstimo ativo
+**Configurações SQLite aplicadas automaticamente:**
+
+| PRAGMA | Valor | Motivo |
+|--------|-------|--------|
+| `autoCommit` | `true` | Evita `SQLITE_BUSY` |
+| `journal_mode` | `WAL` | Melhor concorrência |
+| `busy_timeout` | `3000` | Aguarda até 3s antes de falhar |
+| `foreign_keys` | `ON` | Impede remover livro com empréstimo ativo |
 
 ---
 
@@ -168,14 +176,6 @@ A API sobe automaticamente na porta **8080** ao executar o sistema.
 |--------|----------|-----------|--------|
 | `POST` | `/api/auth/login` | Autentica usuário | 200 / 401 |
 
-```json
-// Body
-{ "login": "admin", "senha": "admin123" }
-
-// Resposta 200
-{ "nome": "Administrador", "login": "admin", "perfil": "ADMIN" }
-```
-
 ### Livros
 
 | Método | Endpoint | Descrição | Status |
@@ -188,14 +188,6 @@ A API sobe automaticamente na porta **8080** ao executar o sistema.
 | `PUT` | `/api/livros/{isbn}` | Edita título, autor e ano | 200 / 404 |
 | `DELETE` | `/api/livros/{isbn}` | Remove livro | 204 / 404 / 409 |
 
-```json
-// POST /api/livros — body
-{ "isbn": "978-85-333-0001-1", "titulo": "Dom Casmurro", "autor": "Machado de Assis", "anoPub": 1899 }
-
-// Resposta 201
-{ "isbn": "978-85-333-0001-1", "titulo": "Dom Casmurro", "autor": "Machado de Assis", "anoPub": 1899, "disponivel": true }
-```
-
 ### Empréstimos
 
 | Método | Endpoint | Descrição | Status |
@@ -206,50 +198,25 @@ A API sobe automaticamente na porta **8080** ao executar o sistema.
 | `POST` | `/api/emprestimos` | Realiza empréstimo | 201 / 400 / 409 |
 | `PATCH` | `/api/emprestimos/{id}/devolver` | Registra devolução | 200 / 400 |
 
-```json
-// POST /api/emprestimos — body
-{ "isbn": "978-85-333-0001-1", "usuario": "Ana Silva", "data": "2025-06-01" }
-
-// Resposta 201
-{
-  "id": "EMP-0001",
-  "livro": { "isbn": "...", "titulo": "Dom Casmurro", "disponivel": false },
-  "nomeUsuario": "Ana Silva",
-  "dataEmprestimo": "2025-06-01",
-  "prazo": "2025-06-15",
-  "devolvido": false
-}
-
-// PATCH /api/emprestimos/EMP-0001/devolver — body
-{ "dataDevolucao": "2025-06-10" }
-```
-
 ---
 
 ## Interface CLI
 
-Ao executar o sistema, além da API, a CLI interativa é iniciada no terminal.
+Ao executar o sistema a CLI é iniciada no terminal após o servidor API subir.
 
-```
-  ========================================================
-  |          SISTEMA DE BIBLIOTECA  v1.0                |
-  |         Gerenciamento de Acervo e Emprestimos       |
-  ========================================================
+### Controle de acesso por perfil nos menus
 
-  Login: admin
-  Senha: ****
+As opções bloqueadas aparecem com o texto `[apenas BIBLIOTECARIO/ADMIN]`. Se o usuário digitar o número mesmo assim, recebe `[ERRO] Acesso negado`.
 
-  [MENU PRINCIPAL | Administrador [ADMIN]]
-  [1] Gerenciar Livros        (Listar / Buscar / Cadastrar / Editar / Remover)
-  [2] Gerenciar Emprestimos   (Emprestar / Devolver / Listar / Atrasos / Historico)
-  [3] Gerenciar Usuarios      (Cadastrar / Listar / Alterar / Remover)
-  [4] Dashboard               (Resumo do sistema)
-  [0] Sair do sistema
-```
-
-### Controle de acesso nos menus
-
-As opções são **filtradas e bloqueadas** conforme o perfil. Se um LEITOR digitar o número de uma opção restrita, recebe `[ERRO] Acesso negado`.
+| Menu | Opções | ADMIN | BIBLIOTECARIO | LEITOR |
+|------|--------|:-----:|:-------------:|:------:|
+| Livros | Listar, buscar | ✅ | ✅ | ✅ |
+| Livros | Cadastrar, editar, remover | ✅ | ✅ | ❌ |
+| Empréstimos | Realizar, devolver | ✅ | ✅ | ❌ |
+| Empréstimos | Listar ativos, atrasos | ✅ | ✅ | ✅ |
+| Empréstimos | Histórico | ✅ qualquer | ✅ qualquer | ✅ próprio |
+| Usuários | CRUD completo | ✅ | ❌ | ❌ |
+| Dashboard | Resumo geral | ✅ | ✅ | ✅ |
 
 ---
 
@@ -260,7 +227,7 @@ As opções são **filtradas e bloqueadas** conforme o perfil. Se um LEITOR digi
 **1. Abrir o projeto**
 
 `File → Open` → selecionar a pasta que contém o `pom.xml` (`Biblioteca/Biblioteca`).
-Quando aparecer o popup *"Maven project detected"*, clicar em **Load** ou **Trust Project**.
+Quando aparecer o popup *"Maven project detected"*, clicar em **Load**.
 
 **2. Sincronizar dependências**
 
@@ -274,27 +241,32 @@ Se não tiver: `Add SDK → Download JDK → Eclipse Temurin 17`.
 
 **4. Executar o sistema**
 
-Abrir `Main.java` e clicar no **triângulo verde** na margem esquerda, ou `Shift + F10`.
+Abrir `Main.java` e clicar no triângulo verde ou `Shift + F10`.
 
-**5. Executar os testes**
+**5. Executar os testes JUnit**
 
 Painel Maven → `Lifecycle` → duplo clique em **test**.
-Ou clicar com botão direito em `src/test/java` → **Run 'All Tests'**.
+
+**6. Silenciar warnings de inicialização** *(opcional)*
+
+`Run → Edit Configurations → VM options`:
+```
+-Dorg.slf4j.simpleLogger.defaultLogLevel=warn --enable-native-access=ALL-UNNAMED
+```
 
 ---
 
 ## Modos de Execução
 
-O `Main.java` aceita argumentos que controlam o que é iniciado:
+Configure em `Run → Edit Configurations → Program arguments`:
 
-| Comando | Comportamento |
-|---------|--------------|
-| `java -jar biblioteca-app.jar` | Sobe a **API REST** (porta 8080) **e** a **CLI** |
-| `java -jar biblioteca-app.jar --api` | Sobe **apenas a API** — ideal para testes com Postman |
-| `java -jar biblioteca-app.jar --cli` | Inicia **apenas a CLI** — sem servidor HTTP |
+| Argumento | Comportamento |
+|-----------|--------------|
+| *(sem argumento)* | Sobe a **API REST** (porta 8080) **e** a **CLI** |
+| `--api` | Sobe **apenas a API** — ideal para testes com Postman e Playwright |
+| `--cli` | Inicia **apenas a CLI** — sem servidor HTTP |
 
-**No IntelliJ**, para usar argumentos:
-`Run → Edit Configurations → Program Arguments → --api`
+> Para os testes de API (Postman) e E2E (Playwright), o sistema deve estar rodando com `--api` ou sem argumento.
 
 ---
 
@@ -320,14 +292,14 @@ Criados automaticamente na **primeira execução** (banco vazio):
 | Ver empréstimos ativos e atrasos | ✅ | ✅ | ✅ |
 | Ver histórico de empréstimos | ✅ (qualquer) | ✅ (qualquer) | ✅ (próprio) |
 | Gerenciar usuários (CRUD) | ✅ | ❌ | ❌ |
-| Dashboard | ✅ | ✅ | ✅ |
+| Dashboard completo | ✅ | ✅ | ✅ |
 | Todos os endpoints da API | ✅ | ✅ | ✅ |
 
 ---
 
 ## Testes
 
-### Visão geral
+### Resumo geral
 
 | Arquivo | Tipo | Testes | Resultado esperado |
 |---------|------|:------:|-------------------|
@@ -336,66 +308,77 @@ Criados automaticamente na **primeira execução** (banco vazio):
 | `EmprestimoTest` | Unitário | 10 | ✅ PASS |
 | `BibliotecaServiceExtraTest` | Unitário | 9 | ✅ PASS |
 | `LivroRepositoryTest` | Unitário | 7 | ✅ PASS |
-| `BibliotecaFalhaTest` | **Proposital** ⚠️ | 3 | ❌ FAIL (esperado) |
 | `LivroRepositoryDBTest` | Integração | 12 | ✅ PASS |
 | `EmprestimoRepositoryTest` | Integração | 10 | ✅ PASS |
 | `UsuarioRepositoryTest` | Integração | 11 | ✅ PASS |
 | `BibliotecaServiceDBTest` | Integração | 15 | ✅ PASS |
-| **Total** | | **84** | **81 PASS / 3 FAIL proposital** |
+| **Total JUnit** | | **84** | **81 PASS / 3 FAIL proposital** |
+| **Postman collection** | API | 15 requests | ✅ PASS |
+| **Playwright** | E2E | 5 cenários | ✅ PASS |
 
-> ⚠️ `BibliotecaFalhaTest` contém **3 testes propositalmente incorretos** para demonstrar como o JUnit reporta falhas. Eles sempre falham — isso é esperado e documentado.
+> ⚠️ `BibliotecaFalhaTest` contém **3 testes propositalmente incorretos** para demonstrar como o JUnit reporta falhas. Eles sempre falham — isso é esperado e documentado no trabalho.
 
-### Testes de integração com banco em memória
+### Testes JUnit — executar no IntelliJ
 
-Os testes de integração usam `jdbc:sqlite::memory:` — banco criado e destruído dentro da JVM para cada classe de teste. Garante isolamento total sem criar arquivos em disco.
-
-### Executar somente os testes corretos
-
-No painel Maven → duplo clique em `test`. Ou via terminal:
-
-```bash
-mvn test -Dtest="LivroTest,BibliotecaServiceTest,EmprestimoTest,BibliotecaServiceExtraTest,LivroRepositoryTest,LivroRepositoryDBTest,EmprestimoRepositoryTest,UsuarioRepositoryTest,BibliotecaServiceDBTest"
-```
-
-Saída esperada:
+Painel Maven → `Lifecycle` → duplo clique em **test**. Saída esperada:
 
 ```
 Tests run: 81, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
-### Testes de API (Postman / Newman)
+> Os testes de integração usam `jdbc:sqlite::memory:` — banco criado e destruído na JVM, sem arquivo em disco.
 
-**Pré-requisito:** sistema rodando com `--api` ou sem argumento (porta 8080 ativa).
+### Testes de API — Postman
+
+**Pré-requisito:** sistema rodando com `--api` (porta 8080 ativa).
+
+A collection possui um grupo **SETUP** que limpa o estado anterior automaticamente antes de cada execução. Importe o arquivo e execute pelo Runner na ordem:
+
+1. SETUP — Limpar estado anterior
+2. AUTH
+3. LIVROS
+4. EMPRESTIMOS
+
+Ou via Newman (linha de comando):
 
 ```bash
-# Instalar Newman (apenas uma vez)
 npm install -g newman
-
-# Executar a collection
 newman run testes_api/Biblioteca_API_Tests.postman_collection.json
 ```
 
-Ou importar no Postman e clicar em **Run Collection**.
+### Testes E2E — Playwright
 
-Resultado esperado: todos os requests com status verde.
+**Pré-requisitos:**
+- Node.js 20+ instalado ([nodejs.org](https://nodejs.org))
+- Sistema rodando com `--api` (porta 8080 ativa)
 
-### Testes E2E (Playwright)
+**Executar pelo terminal integrado do IntelliJ:**
+
+Clique com botão direito na pasta `testes_e2e` no painel Project → **Open In → Terminal**
 
 ```bash
-cd testes_e2e
-npm install @playwright/test
+npm install
 npx playwright install chromium
-npx playwright test --config=playwright.config.js
+npx playwright test --reporter=html
+npx playwright show-report
 ```
 
-Resultado esperado: `5 passed`
+O relatório HTML abre automaticamente no navegador. Os 5 cenários cobrem:
+
+| Teste | Fluxo |
+|-------|-------|
+| CT-E01 | Login → Cadastrar livro → Confirmar na listagem |
+| CT-E02 | Criar livro → Emprestar → Confirmar indisponível |
+| CT-E03 | Emprestar → Devolver → Livro volta a disponível → Histórico |
+| CT-E04 | Credenciais inválidas → 401 → Login válido → 200 |
+| CT-E05 | Emprestar → Tentar emprestar de novo → 409 bloqueado |
 
 ---
 
 ## CI/CD
 
-O arquivo `.gitlab-ci.yml` define três estágios automáticos:
+O arquivo `.gitlab-ci.yml` define três estágios automáticos executados a cada push:
 
 ```
 build  →  test  →  deploy (apenas branch master)
@@ -405,16 +388,28 @@ Os relatórios XML do Surefire (`target/surefire-reports/TEST-*.xml`) são publi
 
 ---
 
+## Problemas conhecidos e soluções
+
+| Problema | Solução |
+|----------|---------|
+| `SQLITE_BUSY` ao rodar o Main | Já corrigido: `autoCommit=true` + `busy_timeout=3000` + `try-with-resources` |
+| Warnings de SLF4J e SQLite no console | Adicionar em VM options: `-Dorg.slf4j.simpleLogger.defaultLogLevel=warn --enable-native-access=ALL-UNNAMED` |
+| `npm` não reconhecido | Instalar Node.js 20+ em nodejs.org e reiniciar o IntelliJ |
+| Testes E2E falhando com erro de conexão | Verificar se a API está rodando: acessar `http://localhost:8080/api/livros` no navegador |
+| Postman CT-A07 falhando com 409 | A collection tem um grupo SETUP que devolve empréstimos anteriores — execute na ordem correta |
+
+---
+
 ## Documentação do Trabalho
 
 Todos os documentos estão na pasta `docs/`:
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| `01_Documento_de_Visao_e_Historias_de_Usuario.docx` | Visão do sistema, requisitos funcionais/não-funcionais e 5 histórias de usuário com critérios de aceitação e cenários BDD (Gherkin) |
-| `02_Plano_de_Testes.docx` | Objetivo, escopo, ferramentas, pirâmide de testes, estratégia, papéis e cronograma |
-| `03_Casos_de_Teste.docx` | Todos os casos de teste com ID, descrição, passos, entradas e saídas esperadas |
-| `04_Relatorio_Final.docx` | Relatório completo com introdução, planejamento, resultados, 16 caixas de evidência para prints e roteiro passo a passo de como executar cada tipo de teste |
+| Arquivo                       | Conteúdo |
+|-------------------------------|----------|
+| `documentoVisaoHistoria.docx` | Visão do sistema, requisitos e 5 histórias de usuário com BDD (Gherkin) |
+| `planoDeTeste.docx`           | Objetivo, escopo, ferramentas, pirâmide de testes e cronograma |
+| `casoDeTeste.docx`            | Todos os casos com ID, descrição, passos, entradas e saídas esperadas |
+| `relatorioFinal.docx`         | Relatório completo com 16 caixas de evidência e roteiro passo a passo de execução dos testes |
 
 ---
 

@@ -1,0 +1,12 @@
+{
+  "name": "biblioteca-e2e",
+  "version": "1.0.0",
+  "description": "Testes E2E do Sistema de Biblioteca usando Playwright",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:report": "npx playwright test --reporter=html && npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0"
+  }
+}

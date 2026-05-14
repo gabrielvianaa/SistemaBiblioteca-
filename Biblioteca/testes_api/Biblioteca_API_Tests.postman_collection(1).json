@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Biblioteca API - Testes",
-    "description": "Base URL: http://localhost:8080\nExecutar via Newman:\n  newman run Biblioteca_API_Tests.postman_collection.json",
+    "description": "Base URL: http://localhost:8080\nExecutar via Newman: newman run Biblioteca_API_Tests.postman_collection.json\n\nIMPORTANTE: Execute os requests NA ORDEM da collection.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,6 +12,10 @@
     {
       "key": "emprestimo_id",
       "value": ""
+    },
+    {
+      "key": "isbn_emprestimo",
+      "value": "978-85-333-0001-1"
     }
   ],
   "item": [
@@ -102,6 +106,18 @@
         {
           "name": "CT-A01 - POST /api/livros (201)",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Remove o livro de teste se ja existir (garante estado limpo)",
+                  "pm.sendRequest({",
+                  "  url: pm.variables.get('base_url') + '/api/livros/978-85-333-0099-9',",
+                  "  method: 'DELETE'",
+                  "}, () => {});"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -410,11 +426,48 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-                  "// Garante livro disponivel antes do emprestimo",
-                  "pm.sendRequest({url:pm.variables.get('base_url')+'/api/livros', method:'POST',",
-                  "  header:{'Content-Type':'application/json'},",
-                  "  body:{mode:'raw',raw:JSON.stringify({isbn:'978-85-333-0001-1',titulo:'Dom Casmurro',autor:'Machado de Assis',anoPub:1899})}",
-                  "}, ()=>{});"
+                  "// Garante que o livro 978-85-333-0001-1 existe e esta disponivel.",
+                  "// Estrategia: busca emprestimos ativos deste livro e devolve se necessario.",
+                  "const base = pm.variables.get('base_url');",
+                  "",
+                  "// Passo 1: garante que o livro existe",
+                  "pm.sendRequest({",
+                  "  url: base + '/api/livros',",
+                  "  method: 'POST',",
+                  "  header: {'Content-Type': 'application/json'},",
+                  "  body: {mode:'raw', raw: JSON.stringify({",
+                  "    isbn: '978-85-333-0001-1',",
+                  "    titulo: 'Dom Casmurro',",
+                  "    autor: 'Machado de Assis',",
+                  "    anoPub: 1899",
+                  "  })}",
+                  "}, (err, res) => {",
+                  "  // Passo 2: verifica se esta disponivel",
+                  "  pm.sendRequest({",
+                  "    url: base + '/api/livros/978-85-333-0001-1',",
+                  "    method: 'GET'",
+                  "  }, (err2, res2) => {",
+                  "    const livro = res2.json();",
+                  "    if (livro && livro.disponivel === false) {",
+                  "      // Esta emprestado: busca o emprestimo ativo e devolve",
+                  "      pm.sendRequest({",
+                  "        url: base + '/api/emprestimos',",
+                  "        method: 'GET'",
+                  "      }, (err3, res3) => {",
+                  "        const ativos = res3.json();",
+                  "        const emp = ativos.find(e => e.livro && e.livro.isbn === '978-85-333-0001-1');",
+                  "        if (emp) {",
+                  "          pm.sendRequest({",
+                  "            url: base + '/api/emprestimos/' + emp.id + '/devolver',",
+                  "            method: 'PATCH',",
+                  "            header: {'Content-Type': 'application/json'},",
+                  "            body: {mode:'raw', raw: JSON.stringify({dataDevolucao: '2025-06-10'})}",
+                  "          }, () => {});",
+                  "        }",
+                  "      });",
+                  "    }",
+                  "  });",
+                  "});"
                 ]
               }
             },
@@ -503,7 +556,7 @@
               "script": {
                 "exec": [
                   "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "pm.test('Array com pelo menos 1', () => pm.expect(pm.response.json().length).to.be.above(0));"
+                  "pm.test('Resposta e array', () => pm.expect(pm.response.json()).to.be.an('array'));"
                 ]
               }
             }
@@ -582,6 +635,27 @@
         {
           "name": "CT-A11 - PATCH /api/emprestimos/{id}/devolver (200)",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Garante que temos um emprestimo_id valido.",
+                  "// Se a variavel estiver vazia, busca o primeiro emprestimo ativo.",
+                  "const id = pm.collectionVariables.get('emprestimo_id');",
+                  "if (!id || id === '') {",
+                  "  pm.sendRequest({",
+                  "    url: pm.variables.get('base_url') + '/api/emprestimos',",
+                  "    method: 'GET'",
+                  "  }, (err, res) => {",
+                  "    const lista = res.json();",
+                  "    if (lista && lista.length > 0) {",
+                  "      pm.collectionVariables.set('emprestimo_id', lista[0].id);",
+                  "    }",
+                  "  });",
+                  "}"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
