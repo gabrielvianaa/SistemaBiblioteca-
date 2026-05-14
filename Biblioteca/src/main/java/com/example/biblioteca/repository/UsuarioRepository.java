@@ -4,13 +4,6 @@ import com.example.biblioteca.model.Usuario;
 import java.sql.*;
 import java.util.Optional;
 
-/**
- * Repositorio de usuarios com persistencia em SQLite.
- * Responsavel por cadastro e autenticacao (login/senha).
- *
- * SEGURANCA: Em producao, a senha deve ser armazenada como hash (ex: BCrypt).
- * Neste projeto academico a senha e armazenada em texto simples para simplicidade.
- */
 public class UsuarioRepository {
 
     private final Connection conn;
@@ -19,9 +12,6 @@ public class UsuarioRepository {
         this.conn = conn;
     }
 
-    // ── CREATE ────────────────────────────────────────────────────────────────
-
-    /** Cadastra um novo usuario. Lanca excecao se o login ja existir. */
     public void cadastrar(Usuario usuario) {
         if (buscarPorLogin(usuario.getLogin()).isPresent())
             throw new IllegalArgumentException("Login ja existe: " + usuario.getLogin());
@@ -38,9 +28,6 @@ public class UsuarioRepository {
         }
     }
 
-    // ── READ ──────────────────────────────────────────────────────────────────
-
-    /** Busca usuario pelo login. */
     public Optional<Usuario> buscarPorLogin(String login) {
         String sql = "SELECT * FROM usuarios WHERE login = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -53,10 +40,6 @@ public class UsuarioRepository {
         }
     }
 
-    /**
-     * Autentica um usuario pelo login e senha.
-     * Retorna o Usuario se as credenciais forem validas, ou vazio caso contrario.
-     */
     public Optional<Usuario> autenticar(String login, String senha) {
         String sql = "SELECT * FROM usuarios WHERE login = ? AND senha = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -70,7 +53,6 @@ public class UsuarioRepository {
         }
     }
 
-    /** Conta o total de usuarios cadastrados. */
     public int total() {
         String sql = "SELECT COUNT(*) FROM usuarios";
         try (Statement st = conn.createStatement();
@@ -81,9 +63,7 @@ public class UsuarioRepository {
         }
     }
 
-    // ── UPDATE ────────────────────────────────────────────────────────────────
 
-    /** Atualiza a senha de um usuario. */
     public void atualizarSenha(String login, String novaSenha) {
         String sql = "UPDATE usuarios SET senha = ? WHERE login = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -97,9 +77,6 @@ public class UsuarioRepository {
         }
     }
 
-    // ── DELETE ────────────────────────────────────────────────────────────────
-
-    /** Remove um usuario pelo login. */
     public void remover(String login) {
         String sql = "DELETE FROM usuarios WHERE login = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -111,8 +88,6 @@ public class UsuarioRepository {
             throw new RuntimeException("Erro ao remover usuario: " + e.getMessage(), e);
         }
     }
-
-    // ── Utilitario ────────────────────────────────────────────────────────────
 
     private Usuario mapear(ResultSet rs) throws SQLException {
         return new Usuario(

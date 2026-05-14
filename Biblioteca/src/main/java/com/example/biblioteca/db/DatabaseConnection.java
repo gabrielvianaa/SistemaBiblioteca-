@@ -5,15 +5,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * Gerencia a conexao com o banco de dados SQLite.
- *
- * Correcoes aplicadas:
- *   1. autoCommit = true  — evita transacoes abertas travando o arquivo
- *   2. PRAGMA busy_timeout — espera ate 3s se outro processo tiver o banco
- *   3. WAL configurado ANTES de criar tabelas
- *   4. Statements fechados explicitamente (try-with-resources)
- */
 public class DatabaseConnection {
 
     private static final String URL = "jdbc:sqlite:biblioteca.db";
@@ -28,12 +19,10 @@ public class DatabaseConnection {
         return instance;
     }
 
-    /** Conexao independente para testes (banco em memoria). */
     public static Connection novaConexao(String url) throws SQLException {
         return abrir(url);
     }
 
-    /** Abre e configura uma conexao SQLite. */
     private static Connection abrir(String url) throws SQLException {
         Connection conn = DriverManager.getConnection(url);
 

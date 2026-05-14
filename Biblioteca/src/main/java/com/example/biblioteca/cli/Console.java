@@ -2,15 +2,9 @@ package com.example.biblioteca.cli;
 
 import java.util.Scanner;
 
-/**
- * Utilitarios de I/O para a interface CLI.
- * Centraliza leitura do teclado e formatacao visual.
- */
 public class Console {
 
     private static final Scanner sc = new Scanner(System.in);
-
-    // ── Leitura ───────────────────────────────────────────────────────────────
 
     public static String lerTexto(String prompt) {
         System.out.print("  " + prompt + ": ");
@@ -47,8 +41,6 @@ public class Console {
         System.out.print("  " + mensagem + " (s/n): ");
         return sc.nextLine().trim().equalsIgnoreCase("s");
     }
-
-    // ── Saida visual ──────────────────────────────────────────────────────────
 
     public static void limpar() {
         // Quebras de linha simulam "limpeza" no IntelliJ (sem suporte a ANSI)

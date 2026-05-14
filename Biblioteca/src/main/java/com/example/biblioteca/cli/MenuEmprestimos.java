@@ -10,13 +10,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-/**
- * Menu CLI de Empréstimos com controle de perfil.
- *
- * LEITOR        — listar ativos, atrasos, histórico próprio
- * BIBLIOTECARIO — tudo: realizar empréstimo + devolver + consultas
- * ADMIN         — tudo que BIBLIOTECARIO faz
- */
 public class MenuEmprestimos {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -29,21 +22,17 @@ public class MenuEmprestimos {
         this.usuario = usuario;
     }
 
-    // ── helpers de perfil ─────────────────────────────────────────────────────
-
     private boolean podeOperar() {
         return "ADMIN".equals(usuario.getPerfil())
                 || "BIBLIOTECARIO".equals(usuario.getPerfil());
     }
 
-    // ── menu ──────────────────────────────────────────────────────────────────
 
     public void exibir() {
         boolean voltar = false;
         while (!voltar) {
             Console.titulo("GERENCIAMENTO DE EMPRESTIMOS  [" + usuario.getPerfil() + "]");
 
-            // Operações restritas — BIBLIOTECARIO e ADMIN
             if (podeOperar()) {
                 Console.opcao(1, "Realizar novo emprestimo");
                 Console.opcao(2, "Registrar devolucao");
@@ -52,7 +41,6 @@ public class MenuEmprestimos {
                 System.out.println("  [2] Registrar devolucao       [apenas BIBLIOTECARIO/ADMIN]");
             }
 
-            // Consultas — todos os perfis
             Console.opcao(3, "Listar emprestimos ativos");
             Console.opcao(4, "Listar emprestimos em atraso");
             Console.opcao(5, "Historico de emprestimos por usuario");
@@ -61,7 +49,6 @@ public class MenuEmprestimos {
 
             int op = Console.lerOpcao(0, 5);
 
-            // Bloqueia 1 e 2 para LEITOR mesmo que ele tente digitar o número
             if ((op == 1 || op == 2) && !podeOperar()) {
                 Console.erro("Acesso negado. Apenas BIBLIOTECARIO ou ADMIN podem realizar esta operacao.");
                 Console.pausar();
@@ -78,8 +65,6 @@ public class MenuEmprestimos {
             }
         }
     }
-
-    // ── 1: Realizar emprestimo ───────────────────────────────────────────────
 
     private void realizarEmprestimo() {
         Console.titulo("REALIZAR EMPRESTIMO");
@@ -117,8 +102,6 @@ public class MenuEmprestimos {
         Console.pausar();
     }
 
-    // ── 2: Registrar devolucao ───────────────────────────────────────────────
-
     private void registrarDevolucao() {
         Console.titulo("REGISTRAR DEVOLUCAO");
 
@@ -151,8 +134,6 @@ public class MenuEmprestimos {
         Console.pausar();
     }
 
-    // ── 3: Listar ativos ────────────────────────────────────────────────────
-
     private void listarAtivos() {
         Console.titulo("EMPRESTIMOS ATIVOS");
         List<Emprestimo> lista = service.listarEmprestimosAtivos();
@@ -166,8 +147,6 @@ public class MenuEmprestimos {
         }
         Console.pausar();
     }
-
-    // ── 4: Listar em atraso ─────────────────────────────────────────────────
 
     private void listarEmAtraso() {
         Console.titulo("EMPRESTIMOS EM ATRASO");
@@ -196,8 +175,6 @@ public class MenuEmprestimos {
         }
         Console.pausar();
     }
-
-    // ── 5: Historico por usuario ────────────────────────────────────────────
 
     private void historicoUsuario() {
         Console.titulo("HISTORICO DE EMPRESTIMOS POR USUARIO");

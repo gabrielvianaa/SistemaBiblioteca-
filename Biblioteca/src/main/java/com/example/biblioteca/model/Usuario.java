@@ -1,13 +1,5 @@
 package com.example.biblioteca.model;
 
-/**
- * Entidade Usuario.
- *
- * Perfis disponiveis:
- *   ADMIN         — acesso total, pode gerenciar usuarios
- *   BIBLIOTECARIO — gerencia livros e emprestimos
- *   LEITOR        — apenas consulta e solicita emprestimos
- */
 public class Usuario {
 
     private final int    id;
@@ -16,7 +8,6 @@ public class Usuario {
     private       String senha;
     private final String perfil;
 
-    /** Construtor completo — usado ao recuperar do banco. */
     public Usuario(int id, String nome, String login, String senha, String perfil) {
         validar(nome, login, senha, perfil);
         this.id     = id;
@@ -26,7 +17,6 @@ public class Usuario {
         this.perfil = perfil;
     }
 
-    /** Construtor sem ID — usado ao cadastrar novo usuario (ID gerado pelo banco). */
     public Usuario(String nome, String login, String senha, String perfil) {
         this(0, nome, login, senha, perfil);
     }

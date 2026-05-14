@@ -14,12 +14,6 @@ import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Testes de integracao do BibliotecaServiceDB.
- *
- * Valida o comportamento do servico de ponta a ponta,
- * incluindo persistencia real no SQLite em memoria.
- */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class BibliotecaServiceDBTest {
 
@@ -58,8 +52,6 @@ class BibliotecaServiceDBTest {
         service.cadastrarUsuario(new Usuario("Leitor", "leitor", "leitor123", "LEITOR"));
     }
 
-    // ── LOGIN ─────────────────────────────────────────────────────────────────
-
     @Test
     @Order(1)
     void deveAutenticarUsuarioValido() {
@@ -74,8 +66,6 @@ class BibliotecaServiceDBTest {
         assertThrows(IllegalArgumentException.class,
             () -> service.login("admin", "errada"));
     }
-
-    // ── LIVROS ────────────────────────────────────────────────────────────────
 
     @Test
     @Order(3)
@@ -116,8 +106,6 @@ class BibliotecaServiceDBTest {
         assertEquals(2, service.totalLivros());
     }
 
-    // ── EMPRESTIMOS ───────────────────────────────────────────────────────────
-
     @Test
     @Order(8)
     void deveRealizarEmprestimoEPersistir() {
@@ -125,11 +113,9 @@ class BibliotecaServiceDBTest {
         assertNotNull(emp);
         assertTrue(emp.getId().matches("EMP-\\d{4}"));
 
-        // Livro deve estar indisponivel no banco
         Livro livro = service.buscarLivro("978-85-333-0001-1").orElseThrow();
         assertFalse(livro.isDisponivel());
 
-        // Emprestimo deve estar persistido
         assertEquals(1, service.totalEmprestimosAtivos());
     }
 
@@ -156,7 +142,6 @@ class BibliotecaServiceDBTest {
 
         service.registrarDevolucao(emp.getId(), HOJE.plusDays(7));
 
-        // Livro volta a estar disponivel no banco
         assertTrue(service.buscarLivro("978-85-333-0001-1").orElseThrow().isDisponivel());
         assertEquals(0, service.totalEmprestimosAtivos());
     }
@@ -164,9 +149,7 @@ class BibliotecaServiceDBTest {
     @Test
     @Order(12)
     void deveListarEmprestimosEmAtraso() {
-        // Emprestimo antigo — em atraso (mais de 14 dias)
         service.realizarEmprestimo("978-85-333-0001-1", "Diego", ANTIGO);
-        // Emprestimo recente — dentro do prazo
         service.realizarEmprestimo("978-85-333-0002-2", "Elisa", HOJE);
 
         List<Emprestimo> atrasados = service.listarEmAtraso(HOJE);

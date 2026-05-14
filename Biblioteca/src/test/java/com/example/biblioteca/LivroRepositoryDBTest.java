@@ -9,26 +9,18 @@ import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Testes de integracao do LivroRepositoryDB.
- *
- * Usa banco SQLite em memoria (:memory:) para cada teste —
- * garante isolamento total sem sujar o banco em disco.
- */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class LivroRepositoryDBTest {
 
     private static Connection conn;
     private static LivroRepositoryDB repo;
 
-    // Livros de fixture
     private static final Livro L1 = new Livro("978-85-333-0001-1", "Dom Casmurro",     "Machado de Assis", 1899);
     private static final Livro L2 = new Livro("978-85-333-0002-2", "O Cortico",         "Aluisio Azevedo",  1890);
     private static final Livro L3 = new Livro("978-85-333-0003-3", "Quincas Borba",     "Machado de Assis", 1891);
 
     @BeforeAll
     static void iniciarBanco() throws Exception {
-        // Banco em memoria — isolado, destruido ao fechar conexao
         conn = DatabaseConnection.novaConexao("jdbc:sqlite::memory:");
         repo = new LivroRepositoryDB(conn);
     }
@@ -42,8 +34,6 @@ class LivroRepositoryDBTest {
     void limparTabela() throws Exception {
         conn.createStatement().execute("DELETE FROM livros");
     }
-
-    // ── CREATE ────────────────────────────────────────────────────────────────
 
     @Test
     @Order(1)
@@ -60,8 +50,6 @@ class LivroRepositoryDBTest {
             () -> repo.adicionar(new Livro("978-85-333-0001-1", "Outro", "Autor", 2000)));
         assertTrue(ex.getMessage().contains("ISBN ja existe"));
     }
-
-    // ── READ ──────────────────────────────────────────────────────────────────
 
     @Test
     @Order(3)
@@ -113,8 +101,6 @@ class LivroRepositoryDBTest {
         assertEquals(3, repo.listarTodos().size());
     }
 
-    // ── UPDATE ────────────────────────────────────────────────────────────────
-
     @Test
     @Order(8)
     void deveAtualizarDisponibilidade() {
@@ -138,8 +124,6 @@ class LivroRepositoryDBTest {
         assertEquals("Dom Casmurro (Ed. Especial)", salvo.getTitulo());
         assertEquals(2000, salvo.getAnoPub());
     }
-
-    // ── DELETE ────────────────────────────────────────────────────────────────
 
     @Test
     @Order(10)

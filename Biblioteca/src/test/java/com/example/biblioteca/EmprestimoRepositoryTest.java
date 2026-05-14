@@ -11,10 +11,6 @@ import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Testes de integracao do EmprestimoRepository.
- * Usa SQLite em memoria para isolamento total.
- */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EmprestimoRepositoryTest {
 
@@ -33,7 +29,6 @@ class EmprestimoRepositoryTest {
         conn      = DatabaseConnection.novaConexao("jdbc:sqlite::memory:");
         livroRepo = new LivroRepositoryDB(conn);
         empRepo   = new EmprestimoRepository(conn, livroRepo);
-        // Inserir livros necessarios para os testes
         livroRepo.adicionar(L1);
         livroRepo.adicionar(L2);
     }
@@ -46,7 +41,6 @@ class EmprestimoRepositoryTest {
     @BeforeEach
     void limpar() throws Exception {
         conn.createStatement().execute("DELETE FROM emprestimos");
-        // Restaurar disponibilidade dos livros
         livroRepo.atualizarDisponibilidade("978-85-333-0001-1", true);
         livroRepo.atualizarDisponibilidade("978-85-333-0002-2", true);
     }
@@ -60,16 +54,12 @@ class EmprestimoRepositoryTest {
         return emp;
     }
 
-    // ── CREATE ────────────────────────────────────────────────────────────────
-
     @Test
     @Order(1)
     void deveSalvarEmprestimoNoBanco() {
         Emprestimo emp = criarEmprestimo("978-85-333-0001-1", "Ana", HOJE);
         assertTrue(empRepo.buscarPorId(emp.getId()).isPresent());
     }
-
-    // ── READ ──────────────────────────────────────────────────────────────────
 
     @Test
     @Order(2)
@@ -93,9 +83,7 @@ class EmprestimoRepositoryTest {
     @Test
     @Order(4)
     void deveListarEmprestimosEmAtraso() {
-        // Emprestimo antigo — em atraso
         criarEmprestimo("978-85-333-0001-1", "Elisa", ANTIGO);
-        // Emprestimo recente — dentro do prazo
         livroRepo.atualizarDisponibilidade("978-85-333-0002-2", true);
         criarEmprestimo("978-85-333-0002-2", "Fabio", HOJE);
 
@@ -109,7 +97,6 @@ class EmprestimoRepositoryTest {
     void deveListarHistoricoDoUsuario() {
         criarEmprestimo("978-85-333-0001-1", "Gabi", HOJE);
 
-        // Devolver L1 para poder emprestar de novo
         empRepo.registrarDevolucao(empRepo.listarAtivos().get(0).getId(), HOJE.plusDays(3));
         livroRepo.atualizarDisponibilidade("978-85-333-0001-1", true);
 
@@ -126,8 +113,6 @@ class EmprestimoRepositoryTest {
         criarEmprestimo("978-85-333-0002-2", "Iara",  HOJE);
         assertEquals(2, empRepo.totalAtivos());
     }
-
-    // ── UPDATE (devolucao) ────────────────────────────────────────────────────
 
     @Test
     @Order(7)

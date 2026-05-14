@@ -24,7 +24,26 @@
                 <transformer>
                   <mainClass>com.example.biblioteca.Main</mainClass>
                 </transformer>
+                <transformer />
+                <transformer>
+                  <addHeader>false</addHeader>
+                </transformer>
+                <transformer />
               </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/DEPENDENCIES</exclude>
+                    <exclude>META-INF/NOTICE*</exclude>
+                    <exclude>META-INF/LICENSE*</exclude>
+                    <exclude>module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
               <finalName>biblioteca-app</finalName>
             </configuration>
           </execution>

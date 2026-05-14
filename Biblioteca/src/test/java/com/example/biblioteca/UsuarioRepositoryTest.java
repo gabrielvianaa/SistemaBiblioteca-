@@ -34,8 +34,6 @@ class UsuarioRepositoryTest {
         conn.createStatement().execute("DELETE FROM usuarios");
     }
 
-    // ── CREATE ────────────────────────────────────────────────────────────────
-
     @Test
     @Order(1)
     void deveCadastrarUsuario() {
@@ -50,8 +48,6 @@ class UsuarioRepositoryTest {
         assertThrows(IllegalArgumentException.class,
             () -> repo.cadastrar(new Usuario("Outro", "admin", "outra", "LEITOR")));
     }
-
-    // ── READ ──────────────────────────────────────────────────────────────────
 
     @Test
     @Order(3)
@@ -87,8 +83,6 @@ class UsuarioRepositoryTest {
         assertFalse(resultado.isPresent());
     }
 
-    // ── UPDATE ────────────────────────────────────────────────────────────────
-
     @Test
     @Order(7)
     void deveAtualizarSenha() {
@@ -101,7 +95,6 @@ class UsuarioRepositoryTest {
         assertTrue(repo.autenticar("ana", "nova456").isPresent());
     }
 
-    // ── DELETE ────────────────────────────────────────────────────────────────
 
     @Test
     @Order(8)
@@ -118,8 +111,6 @@ class UsuarioRepositoryTest {
         assertThrows(IllegalArgumentException.class,
             () -> repo.remover("naoexiste"));
     }
-
-    // ── Validacoes do modelo ──────────────────────────────────────────────────
 
     @Test
     @Order(10)

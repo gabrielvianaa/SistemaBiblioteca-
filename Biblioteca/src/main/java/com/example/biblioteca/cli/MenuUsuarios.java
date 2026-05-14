@@ -7,16 +7,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.sql.*;
 
-/**
- * Menu CLI de CRUD completo de Usuarios.
- * Acesso restrito a perfil ADMIN.
- *
- * Operacoes:
- *   [C] Cadastrar usuario
- *   [R] Listar usuarios
- *   [U] Alterar senha
- *   [D] Remover usuario
- */
+
 public class MenuUsuarios {
 
     private final UsuarioRepository repo;
@@ -48,8 +39,6 @@ public class MenuUsuarios {
         }
     }
 
-    // ── C: Cadastrar ──────────────────────────────────────────────────────────
-
     private void cadastrar() {
         Console.titulo("CADASTRAR NOVO USUARIO");
         try {
@@ -72,8 +61,6 @@ public class MenuUsuarios {
         }
         Console.pausar();
     }
-
-    // ── R: Listar ─────────────────────────────────────────────────────────────
 
     private void listar() {
         Console.titulo("USUARIOS CADASTRADOS");
@@ -99,8 +86,6 @@ public class MenuUsuarios {
         Console.pausar();
     }
 
-    // ── U: Alterar senha ──────────────────────────────────────────────────────
-
     private void alterarSenha() {
         Console.titulo("ALTERAR SENHA DE USUARIO");
         try {
@@ -115,8 +100,6 @@ public class MenuUsuarios {
         }
         Console.pausar();
     }
-
-    // ── D: Remover ────────────────────────────────────────────────────────────
 
     private void remover() {
         Console.titulo("REMOVER USUARIO");
@@ -141,8 +124,6 @@ public class MenuUsuarios {
         }
         Console.pausar();
     }
-
-    // ── Utilitario ────────────────────────────────────────────────────────────
 
     private List<Usuario> buscarTodos() throws SQLException {
         String sql = "SELECT * FROM usuarios ORDER BY perfil, nome";

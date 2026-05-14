@@ -3,11 +3,6 @@ package com.example.biblioteca.cli;
 import com.example.biblioteca.model.Usuario;
 import com.example.biblioteca.service.BibliotecaServiceDB;
 
-/**
- * Tela de login do sistema.
- * Exibe o banner, solicita credenciais e retorna o usuario autenticado.
- * Permite ate 3 tentativas antes de encerrar.
- */
 public class TelaLogin {
 
     private static final int MAX_TENTATIVAS = 3;
@@ -17,10 +12,6 @@ public class TelaLogin {
         this.service = service;
     }
 
-    /**
-     * Exibe a tela de login e retorna o usuario autenticado,
-     * ou null se o numero maximo de tentativas for atingido.
-     */
     public Usuario autenticar() {
         exibirBanner();
 

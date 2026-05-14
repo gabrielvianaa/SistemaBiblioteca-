@@ -4,12 +4,6 @@ import com.example.biblioteca.model.Livro;
 import java.sql.*;
 import java.util.*;
 
-/**
- * Implementacao de LivroRepository com persistencia em SQLite.
- *
- * Todas as operacoes usam PreparedStatement para prevenir SQL Injection.
- * A conexao e injetada pelo construtor (facilita testes com banco em memoria).
- */
 public class LivroRepositoryDB {
 
     private final Connection conn;
@@ -18,12 +12,6 @@ public class LivroRepositoryDB {
         this.conn = conn;
     }
 
-    // ── CREATE ────────────────────────────────────────────────────────────────
-
-    /**
-     * Insere um livro no banco.
-     * Lanca IllegalArgumentException se o ISBN ja existir.
-     */
     public void adicionar(Livro livro) {
         // Verifica duplicata antes de inserir (mensagem de erro clara)
         if (buscarPorIsbn(livro.getIsbn()).isPresent())
@@ -42,9 +30,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    // ── READ ──────────────────────────────────────────────────────────────────
-
-    /** Busca um livro pelo ISBN exato. */
     public Optional<Livro> buscarPorIsbn(String isbn) {
         String sql = "SELECT * FROM livros WHERE isbn = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -57,7 +42,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    /** Busca livros por trecho do nome do autor (case-insensitive). */
     public List<Livro> buscarPorAutor(String autor) {
         String sql = "SELECT * FROM livros WHERE autor LIKE ? COLLATE NOCASE";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -68,7 +52,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    /** Lista somente os livros com disponivel = 1. */
     public List<Livro> listarDisponiveis() {
         String sql = "SELECT * FROM livros WHERE disponivel = 1 ORDER BY titulo";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -78,7 +61,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    /** Lista todos os livros do acervo, ordenados por titulo. */
     public List<Livro> listarTodos() {
         String sql = "SELECT * FROM livros ORDER BY titulo";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -88,7 +70,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    /** Retorna o total de livros no acervo. */
     public int total() {
         String sql = "SELECT COUNT(*) FROM livros";
         try (Statement st = conn.createStatement();
@@ -99,12 +80,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    // ── UPDATE ────────────────────────────────────────────────────────────────
-
-    /**
-     * Atualiza a disponibilidade de um livro no banco.
-     * Chamado pelo servico apos realizar ou registrar devolucao de emprestimo.
-     */
     public void atualizarDisponibilidade(String isbn, boolean disponivel) {
         String sql = "UPDATE livros SET disponivel = ? WHERE isbn = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -116,10 +91,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    /**
-     * Atualiza titulo, autor e ano de um livro existente.
-     * O ISBN (chave primaria) nao pode ser alterado.
-     */
     public void atualizar(Livro livro) {
         if (buscarPorIsbn(livro.getIsbn()).isEmpty())
             throw new IllegalArgumentException("Livro nao encontrado: " + livro.getIsbn());
@@ -136,12 +107,6 @@ public class LivroRepositoryDB {
         }
     }
 
-    // ── DELETE ────────────────────────────────────────────────────────────────
-
-    /**
-     * Remove um livro do acervo.
-     * Lanca IllegalStateException se houver emprestimos ativos para o livro.
-     */
     public void remover(String isbn) {
         if (buscarPorIsbn(isbn).isEmpty())
             throw new IllegalArgumentException("Livro nao encontrado: " + isbn);
@@ -158,8 +123,6 @@ public class LivroRepositoryDB {
             throw new RuntimeException("Erro ao remover livro: " + e.getMessage(), e);
         }
     }
-
-    // ── Utilitario ────────────────────────────────────────────────────────────
 
     private Livro mapearLivro(ResultSet rs) throws SQLException {
         Livro l = new Livro(

@@ -6,13 +6,6 @@ import com.example.biblioteca.service.BibliotecaServiceDB;
 
 import java.util.List;
 
-/**
- * Menu CLI de CRUD de Livros com controle de perfil.
- *
- * LEITOR        — apenas consulta (listar, buscar, disponíveis)
- * BIBLIOTECARIO — consulta + cadastrar + editar + remover
- * ADMIN         — tudo que BIBLIOTECARIO faz
- */
 public class MenuLivros {
 
     private final BibliotecaServiceDB service;
@@ -22,8 +15,6 @@ public class MenuLivros {
         this.service = service;
         this.usuario = usuario;
     }
-
-    // ── helpers de perfil ─────────────────────────────────────────────────────
 
     private boolean isLeitor() {
         return "LEITOR".equals(usuario.getPerfil());
@@ -41,13 +32,11 @@ public class MenuLivros {
         while (!voltar) {
             Console.titulo("GERENCIAMENTO DE LIVROS  [" + usuario.getPerfil() + "]");
 
-            // Consultas — todos os perfis
             Console.opcao(1, "Listar todos os livros");
             Console.opcao(2, "Buscar livro por ISBN");
             Console.opcao(3, "Buscar livros por autor");
             Console.opcao(4, "Listar livros disponiveis");
 
-            // Escrita — apenas BIBLIOTECARIO e ADMIN
             if (podeEditar()) {
                 Console.opcao(5, "Cadastrar novo livro");
                 Console.opcao(6, "Editar livro");
@@ -63,7 +52,6 @@ public class MenuLivros {
 
             int op = Console.lerOpcao(0, 7);
 
-            // Bloqueia 5, 6 e 7 para LEITOR mesmo que ele tente digitar o número
             if ((op == 5 || op == 6 || op == 7) && !podeEditar()) {
                 Console.erro("Acesso negado. Apenas BIBLIOTECARIO ou ADMIN podem realizar esta operacao.");
                 Console.pausar();
@@ -82,8 +70,6 @@ public class MenuLivros {
             }
         }
     }
-
-    // ── C: Cadastrar ─────────────────────────────────────────────────────────
 
     private void cadastrar() {
         Console.titulo("CADASTRAR NOVO LIVRO");
@@ -104,8 +90,6 @@ public class MenuLivros {
         }
         Console.pausar();
     }
-
-    // ── R: Listar / Buscar ───────────────────────────────────────────────────
 
     private void listarTodos() {
         Console.titulo("TODOS OS LIVROS DO ACERVO");
@@ -162,7 +146,6 @@ public class MenuLivros {
         Console.pausar();
     }
 
-    // ── U: Editar ────────────────────────────────────────────────────────────
 
     private void editar() {
         Console.titulo("EDITAR LIVRO");
@@ -202,7 +185,6 @@ public class MenuLivros {
         Console.pausar();
     }
 
-    // ── D: Remover ───────────────────────────────────────────────────────────
 
     private void remover() {
         Console.titulo("REMOVER LIVRO");
@@ -228,7 +210,6 @@ public class MenuLivros {
         Console.pausar();
     }
 
-    // ── Layout ───────────────────────────────────────────────────────────────
 
     private void imprimirCabecalho() {
         Console.separador();

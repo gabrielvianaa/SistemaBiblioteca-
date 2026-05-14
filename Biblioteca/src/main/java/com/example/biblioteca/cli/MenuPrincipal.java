@@ -10,13 +10,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-/**
- * Menu principal do sistema com controle de perfil.
- *
- * ADMIN         — acesso total
- * BIBLIOTECARIO — livros + empréstimos (sem gerenciar usuários)
- * LEITOR        — apenas consultas de livros e próprio histórico
- */
 public class MenuPrincipal {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -37,7 +30,6 @@ public class MenuPrincipal {
             exibirMenu();
             int op = lerOpcaoPermitida();
             switch (op) {
-                // Passa o usuário logado — cada menu aplica suas próprias restrições
                 case 1 -> new MenuLivros(service, usuarioLogado).exibir();
                 case 2 -> new MenuEmprestimos(service, usuarioLogado).exibir();
                 case 3 -> {
@@ -54,8 +46,6 @@ public class MenuPrincipal {
             }
         }
     }
-
-    // ── Menu principal ───────────────────────────────────────────────────────
 
     private void exibirMenu() {
         Console.limpar();
@@ -86,8 +76,6 @@ public class MenuPrincipal {
             }
         }
     }
-
-    // ── Dashboard ───────────────────────────────────────────────────────────
 
     private void exibirDashboard() {
         Console.titulo("DASHBOARD DO SISTEMA");
@@ -125,8 +113,6 @@ public class MenuPrincipal {
 
         Console.pausar();
     }
-
-    // ── Helpers de perfil ───────────────────────────────────────────────────
 
     private boolean isAdmin() {
         return "ADMIN".equals(usuarioLogado.getPerfil());
