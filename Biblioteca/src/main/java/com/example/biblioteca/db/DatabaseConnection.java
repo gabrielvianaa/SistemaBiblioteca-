@@ -27,16 +27,9 @@ public class DatabaseConnection {
         Connection conn = DriverManager.getConnection(url);
 
         try (Statement st = conn.createStatement()) {
-            // 1. Autocommit ligado — sem transacao implicita pendente
             conn.setAutoCommit(true);
-
-            // 2. WAL: melhor concorrencia, evita SQLITE_BUSY em leituras
             st.execute("PRAGMA journal_mode=WAL;");
-
-            // 3. Timeout de 3 segundos antes de desistir com SQLITE_BUSY
             st.execute("PRAGMA busy_timeout=3000;");
-
-            // 4. Chaves estrangeiras
             st.execute("PRAGMA foreign_keys=ON;");
         }
 

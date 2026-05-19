@@ -13,7 +13,6 @@ public class LivroRepositoryDB {
     }
 
     public void adicionar(Livro livro) {
-        // Verifica duplicata antes de inserir (mensagem de erro clara)
         if (buscarPorIsbn(livro.getIsbn()).isPresent())
             throw new IllegalArgumentException("ISBN ja existe: " + livro.getIsbn());
 

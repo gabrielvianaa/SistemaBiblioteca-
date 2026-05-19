@@ -11,32 +11,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
-/**
- * Servidor HTTP da API REST do Sistema de Biblioteca.
- *
- * Porta: 8080
- * Base URL: http://localhost:8080
- *
- * Endpoints disponíveis:
- *
- *   AUTH
- *     POST   /api/auth/login
- *
- *   LIVROS
- *     GET    /api/livros
- *     GET    /api/livros/{isbn}
- *     GET    /api/livros?autor=xxx
- *     POST   /api/livros
- *     PUT    /api/livros/{isbn}
- *     DELETE /api/livros/{isbn}
- *
- *   EMPRÉSTIMOS
- *     GET    /api/emprestimos
- *     GET    /api/emprestimos/atraso
- *     GET    /api/emprestimos/usuario/{nome}
- *     POST   /api/emprestimos
- *     PATCH  /api/emprestimos/{id}/devolver
- */
 public class ApiServer {
 
     private final BibliotecaServiceDB service;
@@ -65,7 +39,6 @@ public class ApiServer {
 
     private void registrarRotas() {
 
-        // ── Tratamento global de erros ────────────────────────────────────
         app.exception(IllegalArgumentException.class, (e, ctx) -> {
             ctx.status(400).json(Map.of("erro", e.getMessage()));
         });

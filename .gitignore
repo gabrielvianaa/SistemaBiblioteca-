@@ -13,7 +13,7 @@
 
 
 # ─── MAVEN ──────────────────────────────────────────────────
-target/
+Biblioteca/target/
 *.class
 *.jar
 *.war

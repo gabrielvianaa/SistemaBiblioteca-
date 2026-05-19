@@ -43,7 +43,6 @@ public class Console {
     }
 
     public static void limpar() {
-        // Quebras de linha simulam "limpeza" no IntelliJ (sem suporte a ANSI)
         for (int i = 0; i < 3; i++) System.out.println();
     }
 
